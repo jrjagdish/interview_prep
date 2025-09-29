@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useInterviewStore } from "../store/interViewStore";
@@ -76,13 +76,17 @@ function UploadResume() {
     console.log("Uploading file:", file);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/parse_resume/", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://interview-prep-backend-1.onrender.com/parse_resume/",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
@@ -90,12 +94,15 @@ function UploadResume() {
 
       // Fix: Access the data from the correct property based on your Python backend
       const extracted = result.extracted;
-      
+
       // Determine missing fields
       const missing = [];
-      if (extracted.name === "❌ Missing" || !extracted.name) missing.push("name");
-      if (extracted.email === "❌ Missing" || !extracted.email) missing.push("email");
-      if (extracted.phone === "❌ Missing" || !extracted.phone) missing.push("phone");
+      if (extracted.name === "❌ Missing" || !extracted.name)
+        missing.push("name");
+      if (extracted.email === "❌ Missing" || !extracted.email)
+        missing.push("email");
+      if (extracted.phone === "❌ Missing" || !extracted.phone)
+        missing.push("phone");
 
       // Clean the data (remove the "❌ Missing" text)
       const cleanedData = {
@@ -108,10 +115,13 @@ function UploadResume() {
       setMissingFields(missing);
       setFormData(cleanedData);
       setStep("review");
-      
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert(`Error processing file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Error processing file: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     } finally {
       setUploading(false);
     }
@@ -130,8 +140,6 @@ function UploadResume() {
       return;
     }
 
-    
-    
     const candidateId = `cand_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
@@ -161,9 +169,6 @@ function UploadResume() {
     setMissingFields([]);
     setFormData({ name: "", email: "", phone: "" });
   }
-
-   
-  
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
