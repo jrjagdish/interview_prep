@@ -10,9 +10,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Bot, User, Clock, AlertTriangle, Link } from "lucide-react";
-import { useInterviewStore } from "@/app/store/interViewStore";
+import { ArrowUp, Bot, User, Clock, AlertTriangle } from "lucide-react";
+// Update the import path to the correct location of your store file
+import { useInterviewStore } from "../../store/interViewStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
+import { InterviewResponse } from "@/app/store/interViewStore";
 
 interface CandidateInfo {
   name: string;
@@ -50,13 +53,13 @@ function InterviewPage() {
   const getTimeForDifficulty = (difficulty: string): number => {
     switch (difficulty) {
       case "easy":
-        return 20; // 20 seconds
+        return 30; // 30 seconds
       case "medium":
         return 60; // 60 seconds
       case "hard":
-        return 120; // 120 seconds
+        return 90; // 90 seconds
       default:
-        return 30; // default fallback
+        return 30;
     }
   };
 
@@ -68,12 +71,9 @@ function InterviewPage() {
   };
 
   // Get time color based on remaining time
-  useEffect(() => {
-    startTimer();
-  }, []);
   const getTimeColor = (): string => {
-    if (timeRemaining <= 10) return "text-white-600";
-    if (timeRemaining <= 30) return "text-white-500";
+    if (timeRemaining <= 10) return "text-red-600";
+    if (timeRemaining <= 30) return "text-orange-500";
     return "text-gray-700";
   };
 
@@ -118,7 +118,6 @@ function InterviewPage() {
   useEffect(() => {
     if (timeRemaining === 0 && isTimerRunning) {
       stopTimer();
-      // Auto-submit empty answer when time expires
       handleTimeExpired();
     }
   }, [timeRemaining, isTimerRunning]);
@@ -138,12 +137,27 @@ function InterviewPage() {
       const result = await response.json();
 
       if (result.success) {
-        const timeTaken = getTimeForDifficulty(currentDifficulty); // Used full time
-        saveResponse(result.data);
+        const timeTaken = getTimeForDifficulty(currentDifficulty);
+        saveResponse({
+          ...result.data,
+          timeTaken,
+          timeAllotted: getTimeForDifficulty(currentDifficulty),
+          difficulty: currentDifficulty,
+        });
         addTimeTaken(timeTaken);
 
         if (result.data.isCorrect) {
           incrementScore(timeTaken, getTimeForDifficulty(currentDifficulty));
+        }
+
+        // Start timer for next question if not complete
+        if (!result.data.isComplete && result.data.question) {
+          const nextDifficulty = result.data.difficulty || "easy";
+          const nextTimeAllotted = getTimeForDifficulty(nextDifficulty);
+          setCurrentDifficulty(nextDifficulty);
+          setTimer(nextTimeAllotted);
+          setStartTime(Date.now());
+          startTimer();
         }
       }
     } catch (error) {
@@ -169,12 +183,13 @@ function InterviewPage() {
       if (result.success) {
         saveResponse(result.data);
 
-        // Set up timer for next question
+        // Set up timer for the first question
         const difficulty = result.data.difficulty || "easy";
         const timeAllotted = getTimeForDifficulty(difficulty);
         setCurrentDifficulty(difficulty);
         setTimer(timeAllotted);
         setStartTime(Date.now());
+        startTimer();
 
         if (result.data.isCorrect) {
           incrementScore();
@@ -189,7 +204,7 @@ function InterviewPage() {
   const submitAnswer = async (): Promise<void> => {
     if (!answer.trim()) return;
 
-    stopTimer(); // Stop timer when submitting
+    stopTimer();
     const timeTaken = startTime
       ? Math.floor((Date.now() - startTime) / 1000)
       : 0;
@@ -224,6 +239,16 @@ function InterviewPage() {
 
         setAnswer("");
         setStartTime(0);
+
+        // Start timer for next question if not complete
+        if (!result.data.isComplete && result.data.question) {
+          const nextDifficulty = result.data.difficulty || "easy";
+          const nextTimeAllotted = getTimeForDifficulty(nextDifficulty);
+          setCurrentDifficulty(nextDifficulty);
+          setTimer(nextTimeAllotted);
+          setStartTime(Date.now());
+          startTimer();
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -256,7 +281,9 @@ function InterviewPage() {
 
   // Helper function to safely access completion message
   const getCompletionMessage = (response: any) => {
-    return response.completionMessage || "Thank you for your participation!";
+    return (
+      response.completionMessage || "Thank you for completing the interview!"
+    );
   };
 
   // Calculate average time per question
@@ -280,12 +307,12 @@ function InterviewPage() {
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
                   Technical Interview Bot
-                  {/* Clock shown at CardTitle */}
-                  {isTimerRunning && (
+                  {/* Show timer only when active */}
+                  {isTimerRunning && timeRemaining > 0 && (
                     <div
                       className={`flex items-center space-x-1 ${getTimeColor()}`}
                     >
-                      <Clock className="h-4 w-4 bg-white" />
+                      <Clock className="h-4 w-4" />
                       <span className="font-mono font-bold text-sm">
                         {formatTime(timeRemaining)}
                       </span>
@@ -326,7 +353,7 @@ function InterviewPage() {
             ) : (
               <div className="space-y-4">
                 {/* Display all questions and responses in chat format */}
-                {responses.map((response, index) => (
+                {responses.map((response: InterviewResponse, index: number) => (
                   <div key={index} className="space-y-4">
                     {/* AI Questions */}
                     {response.question && (
@@ -358,7 +385,7 @@ function InterviewPage() {
                           <p className="text-gray-800 whitespace-pre-wrap text-sm md:text-base">
                             {formatMessage(response.question)}
                           </p>
-                          {response.timeTaken && (
+                          {response.timeTaken !== undefined && (
                             <p className="text-xs text-gray-500 mt-2">
                               Time taken: {response.timeTaken}s /{" "}
                               {response.timeAllotted}s
@@ -444,14 +471,13 @@ function InterviewPage() {
                 )}
 
                 {/* Progress display */}
-                {responses.length > 0 && (
+                {responses.length > 0 && !isComplete() && (
                   <div className="text-center pt-4 border-t border-gray-100">
                     <p className="text-xs text-gray-500">
                       Question {Math.min(questionCount + 1, 6)} of 6
-                      {isComplete() && " • Completed!"}
                     </p>
                     <p className="text-sm font-medium text-gray-700 mt-1">
-                      Score: {getScoreFormatted()}
+                      Current Score: {getScoreFormatted()}
                     </p>
                   </div>
                 )}
@@ -461,7 +487,7 @@ function InterviewPage() {
         </CardContent>
 
         {/* Answer input only if interview started and not complete */}
-        {responses.length > 0 && !isComplete() && (
+        {responses.length > 0 && !isComplete() && timeRemaining > 0 && (
           <CardFooter className="p-2 border-t bg-white">
             <div className="relative w-full">
               <Input
@@ -490,20 +516,18 @@ function InterviewPage() {
         {isComplete() && (
           <CardFooter className="bg-white p-4 flex flex-col space-y-2">
             <Button
-              variant="outline"
               onClick={resetInterview}
-              className="w-full border-2 p-4 border-blue-200 hover:bg-blue-500 text-gray-700 font-medium py-3 rounded-md text-sm md:text-base"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-md text-sm md:text-base"
             >
               Start New Interview
             </Button>
-            <Link href="/" >
-            <Button
-              variant="outline"
-              onClick={reset}
-              className="w-full border-2 p-4 border-black hover:bg-white text-gray-700 font-medium py-3 rounded-md text-sm md:text-base"
-            >
-               Back To Dashboard
-            </Button>
+            <Link href="/" passHref>
+              <Button
+                variant="outline"
+                className="w-full border-2 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-md text-sm md:text-base"
+              >
+                Back To Dashboard
+              </Button>
             </Link>
           </CardFooter>
         )}

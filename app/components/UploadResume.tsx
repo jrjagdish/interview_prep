@@ -1,5 +1,5 @@
 "use client"
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { useInterviewStore } from "../store/interViewStore";
 import { useRouter } from "next/navigation";
@@ -28,16 +28,16 @@ function UploadResume() {
   });
   // If you need to check for an active interview, use a different logic or remove this block.
   // For now, we'll just reset if there are responses.
-  if (responses.length > 0) {
-    const shouldReset = confirm(
-      "There's an active interview in progress. Uploading a new resume will start a fresh interview. Do you want to continue?"
-    );
-    if (!shouldReset) {
-      return;
+  useEffect(() => {
+    if (responses.length > 0) {
+      const shouldReset = confirm(
+        "There's an active interview in progress. Uploading a new resume will start a fresh interview. Do you want to continue?"
+      );
+      if (shouldReset) {
+        reset(); // safe here
+      }
     }
-    // Reset the store for new interview
-    reset();
-  }
+  }, [responses, reset]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0] || null;

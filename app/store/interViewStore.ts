@@ -21,8 +21,8 @@ interface InterviewState {
   currentDifficulty: "easy" | "medium" | "hard";
   totalTimeTaken: number;
   timerId: NodeJS.Timeout | null;
-  resumeFile: File | null; // Add resume file state
-  resumeText: string; // Add resume text state
+  resumeFile: File | null;
+  resumeText: string;
 
   // Actions
   setTimer: (time: number) => void;
@@ -35,8 +35,9 @@ interface InterviewState {
   isComplete: () => boolean;
   saveResponse: (response: InterviewResponse) => void;
   incrementScore: (timeTaken?: number, timeAllotted?: number) => void;
-  setResumeFile: (file: File | null) => void; // Add setResumeFile action
-  setResumeText: (text: string) => void; // Add setResumeText action
+  setResumeFile: (file: File | null) => void;
+  setResumeText: (text: string) => void;
+  hasActiveInterview: () => boolean;
   reset: () => void;
 }
 
@@ -52,8 +53,8 @@ export const useInterviewStore = create<InterviewState>()(
       currentDifficulty: "easy",
       totalTimeTaken: 0,
       timerId: null,
-      resumeFile: null, // Initialize resumeFile
-      resumeText: "", // Initialize resumeText
+      resumeFile: null,
+      resumeText: "",
 
       setTimer: (time: number) => {
         const { timerId } = get();
@@ -166,13 +167,17 @@ export const useInterviewStore = create<InterviewState>()(
         }
       },
 
-      // Add the missing resume file actions
       setResumeFile: (file: File | null) => {
         set({ resumeFile: file });
       },
 
       setResumeText: (text: string) => {
         set({ resumeText: text });
+      },
+
+      hasActiveInterview: () => {
+        const state = get();
+        return state.responses.length > 0 && !state.isComplete();
       },
 
       reset: () => {
@@ -195,16 +200,9 @@ export const useInterviewStore = create<InterviewState>()(
           resumeText: "",
         });
       },
-
-      // Add this action to check if there's an active interview
-      hasActiveInterview: () => {
-        const state = get();
-        return state.responses.length > 0 && !state.isComplete();
-      },
     }),
     {
       name: "interview-storage",
-      // Only persist certain states, exclude File objects which can't be serialized
       partialize: (state) => ({
         responses: state.responses,
         currentQuestion: state.currentQuestion,
@@ -215,8 +213,8 @@ export const useInterviewStore = create<InterviewState>()(
         currentDifficulty: state.currentDifficulty,
         totalTimeTaken: state.totalTimeTaken,
         resumeText: state.resumeText,
-        // Note: resumeFile is excluded from persistence as File objects can't be serialized
       }),
+      version: 1,
     }
   )
 );
