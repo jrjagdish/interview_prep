@@ -44,7 +44,7 @@ export default function Home() {
                 results.
               </p>
               <Link
-                href="/dashboard"
+                href="/InterviewerDashboard"
                 className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700"
               >
                 Go to Dashboard

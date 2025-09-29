@@ -15,6 +15,7 @@ interface GroqResponse {
   isCorrect: boolean;
   isComplete: boolean;
   completionMessage: string | null;
+  difficulty?: "easy" | "medium" | "hard";
 }
 
 interface ApiResponse {
@@ -41,31 +42,43 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     const questionCount = currentState?.questionCount || 0;
     const score = currentState?.score || 0;
     
-    // Fix: We've already asked 'questionCount' questions, next is questionCount + 1
-    // If we're about to ask the 6th question (questionCount === 5), then it's the last one
-    const isLastQuestion = questionCount >= 5; // 0-4 = 5 questions asked, next is 6th
+    const isLastQuestion = questionCount >= 5;
     
     console.log(`Question count: ${questionCount}, Is last question: ${isLastQuestion}`);
 
+    // Determine difficulty based on question number
+    let difficulty: "easy" | "medium" | "hard" = "easy";
+    if (questionCount >= 4) difficulty = "hard";
+    else if (questionCount >= 2) difficulty = "medium";
+
     const prompt = `
-    You are a technical interviewer. Ask technical questions about web development.
-    ${userAnswer ? `The user answered: "${userAnswer}". Evaluate if correct or not and provide brief feedback.` : "Ask the first technical question about web development."}
+    You are a technical interviewer conducting a web development interview.
     
-    Current: Question ${questionCount + 1} of 6.
-    ${isLastQuestion ? "This is the LAST question. After evaluating the answer, mark the interview as complete." : ""}
+    ${userAnswer 
+      ? `The candidate answered: "${userAnswer}". Evaluate if this answer is correct and provide brief constructive feedback.` 
+      : "Ask the next technical question about web development."
+    }
+    
+    Current Progress: Question ${questionCount + 1} of 6
+    Difficulty Level: ${difficulty}
+    ${isLastQuestion ? "This is the FINAL question. After evaluating the answer, provide a completion message and end the interview." : ""}
     
     Rules:
-    - If this is the first request (no userAnswer), provide a question
-    - If user provided answer, evaluate it and provide the next question unless this was the last question
+    - If this is the first request (no userAnswer), provide an EASY question about basic web development
+    - If user provided answer, evaluate it honestly and provide the next question
+    - Questions should progress in difficulty: easy → medium → hard
+    - Technical topics: HTML, CSS, JavaScript, React, Node.js, APIs, etc.
     - After the 6th question, mark as complete
+    - Return the difficulty level with each question
     
-    Return ONLY valid JSON, no code blocks, no extra text:
+    Response Format (JSON only):
     {
-      "question": "next question or null if done",
-      "feedback": "if user answered, say correct/incorrect and why",
+      "question": "the next question or null if interview is complete",
+      "feedback": "brief feedback on the answer if provided, otherwise empty string",
       "isCorrect": true/false,
       "isComplete": ${isLastQuestion ? "true" : "false"},
-      "completionMessage": ${isLastQuestion ? "\"Thank you for completing the interview! Your final score will be reviewed.\"" : "null"}
+      "difficulty": "${difficulty}",
+      "completionMessage": ${isLastQuestion ? "\"Thank you for completing the technical interview! Your responses have been recorded and will be reviewed by our team.\"" : "null"}
     }`;
 
     const response = await client.responses.create({
@@ -81,29 +94,31 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       data = JSON.parse(responseText) as GroqResponse;
     } catch (e) {
       console.error("JSON parse error:", e, responseText);
-      // Fallback questions for each stage
+      
+      // Fallback questions with proper difficulty progression
       const fallbackQuestions = [
-        "What is React and what are its key features?",
-        "Explain the difference between let, const, and var in JavaScript.",
-        "What are React hooks and why were they introduced?",
-        "How does CSS Flexbox work and what are its main properties?",
-        "What is the virtual DOM in React and how does it improve performance?",
-        "Explain the concept of closures in JavaScript with an example."
+        { question: "What is the difference between let, const, and var in JavaScript?", difficulty: "easy" },
+        { question: "Explain how CSS Flexbox works and when you would use it.", difficulty: "easy" },
+        { question: "What are React hooks and why were they introduced? Give examples.", difficulty: "medium" },
+        { question: "How would you optimize website performance for faster loading?", difficulty: "medium" },
+        { question: "Explain the concept of closures in JavaScript with a practical example.", difficulty: "hard" },
+        { question: "Describe how you would implement authentication in a React/Node.js application.", difficulty: "hard" }
       ];
       
-      const currentIndex = userAnswer ? questionCount : questionCount - 1;
-      const fallbackQuestion = currentIndex < fallbackQuestions.length ? fallbackQuestions[currentIndex] : null;
+      const currentIndex = userAnswer ? questionCount : questionCount;
+      const fallback = currentIndex < fallbackQuestions.length ? fallbackQuestions[currentIndex] : fallbackQuestions[0];
       
       data = {
-        question: isLastQuestion ? null : fallbackQuestion,
-        feedback: userAnswer ? "Could not evaluate answer properly" : "",
-        isCorrect: false,
+        question: isLastQuestion ? null : fallback.question,
+        feedback: userAnswer ? "Thank you for your answer. Let's continue with the next question." : "",
+        isCorrect: userAnswer ? true : false,
         isComplete: isLastQuestion,
-        completionMessage: isLastQuestion ? "Thank you for completing the interview! Your final score will be reviewed." : null,
+        difficulty: fallback.difficulty as "easy" | "medium" | "hard",
+        completionMessage: isLastQuestion ? "Thank you for completing the technical interview! Your responses have been recorded and will be reviewed by our team." : null,
       };
     }
 
-    // Calculate new state - only increment question count if we're asking a new question
+    // Calculate new state
     const newScore = userAnswer && data.isCorrect ? score + 1 : score;
     const newQuestionCount = userAnswer ? questionCount + 1 : questionCount;
 
@@ -111,9 +126,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       success: true,
       data: {
         ...data,
-        // Ensure we have a question if not complete
-        question: data.question || (data.isComplete ? null : "What is React and what are its key features?"),
+        question: data.question || (data.isComplete ? null : "What are the key features of React?"),
         isComplete: data.isComplete || isLastQuestion,
+        difficulty: data.difficulty || difficulty,
       },
       newState: {
         score: newScore,
@@ -127,10 +142,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       success: false,
       error: error instanceof Error ? error.message : String(error),
       data: {
-        question: "What is React and what are its key features?",
-        feedback: "Error occurred, please continue",
+        question: "What is React and what are its main advantages?",
+        feedback: "An error occurred, please continue with the interview",
         isCorrect: false,
         isComplete: false,
+        difficulty: "easy",
         completionMessage: null,
       },
     });
