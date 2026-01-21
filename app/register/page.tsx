@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { ChevronLeft, Eye, EyeOff, Router, ShieldCheck, Sparkles } from "lucide-react";
-import router from "next/router";
 import Link from "next/link";
+
 
 export default function RegisterPage() {
   const [activeTab, setActiveTab] = useState("candidate");
