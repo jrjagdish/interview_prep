@@ -15,6 +15,8 @@ import {
   Clock,
   Users
 } from 'lucide-react';
+import router from 'next/router';
+import Link from 'next/link';
 
 // --- Types ---
 interface StatCardProps {
@@ -106,10 +108,10 @@ const HomePage = () => {
               <h2 className="text-2xl font-bold tracking-tight">Start Interview Practice</h2>
               <p className="text-slate-400 text-sm">Choose your specialty and begin a session</p>
             </div>
-            <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95">
+            <Link href="/interviewtab"><button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95">
               <PlayCircle className="w-5 h-5" />
               Start All Sessions
-            </button>
+            </button></Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -126,7 +128,7 @@ const HomePage = () => {
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-[10px] font-bold text-white/90 bg-black/20 px-2 py-1 rounded-md uppercase tracking-wider">{action.time}</span>
                     <div className="p-2 bg-white/20 rounded-lg group-hover:bg-white/40 transition-colors">
-                      <Play className="w-4 h-4 text-white fill-white" />
+                      <Link href="/interviewtab"><Play className="w-4 h-4 text-white fill-white" /></Link>
                     </div>
                   </div>
                 </div>
@@ -171,8 +173,10 @@ const HomePage = () => {
                   <p className="text-[10px] text-slate-400">Join peers every Friday</p>
                 </div>
               </div>
-              <button className="w-full mt-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-sm font-bold rounded-xl transition-colors border border-slate-700">
-                Join Next Session
+              <button onClick={()=>{
+                router.push("/interviewerDashboard")
+              }} className="w-full mt-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-sm font-bold rounded-xl transition-colors border border-slate-700">
+                See All Sessions
               </button>
             </div>
           </div>

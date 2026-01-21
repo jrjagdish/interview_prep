@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, Eye, EyeOff, Router, ShieldCheck, Sparkles } from "lucide-react";
 import router from "next/router";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const [activeTab, setActiveTab] = useState("candidate");
@@ -29,35 +30,35 @@ export default function RegisterPage() {
     setError("");
 
     // Determine role: "user" if candidate, "admin" if company
-    const role = activeTab === "candidate" ? "user" : "admin";
+    // const role = activeTab === "candidate" ? "user" : "admin";
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/auth/register", {
-        // Update with your actual API URL
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          full_name: formData.fullName, // Ensure this matches your FastAPI UserCreate schema keys
-          role: role, // Role logic injected here
-        }),
-      });
+    // try {
+    //   const response = await fetch("http://127.0.0.1:8000/auth/register", {
+    //     // Update with your actual API URL
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       email: formData.email,
+    //       password: formData.password,
+    //       full_name: formData.fullName, // Ensure this matches your FastAPI UserCreate schema keys
+    //       role: role, // Role logic injected here
+    //     }),
+    //   });
 
-      const data = await response.json();
+    //   const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.detail || "Registration failed");
-      }
+    //   if (!response.ok) {
+    //     throw new Error(data.detail || "Registration failed");
+    //   }
 
-      alert("Registration successful!");
-      router.push("/login")
+      // alert("Registration successful!");
+      
       // Redirect to login or dashboard here
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    // } catch (err: any) {
+    //   setError(err.message);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
   /* --- BACKEND INTEGRATION END --- */
 
@@ -167,14 +168,17 @@ export default function RegisterPage() {
         </div>
 
         <div className="px-8 pb-10 space-y-6">
+          <Link href="/login">
           <button
-            onClick={handleRegister}
+            onClick={() => {
+              handleRegister();
+            }}
             disabled={loading}
             className={`w-full ${loading ? "opacity-50" : "bg-blue-600 hover:bg-blue-500"} text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group`}
           >
             <span>{loading ? "Processing..." : "Create My Account"}</span>
             <div className="size-1.5 bg-white rounded-full animate-pulse group-hover:scale-125 transition-transform" />
-          </button>
+          </button></Link>
 
           <div className="space-y-4">
             <p className="text-[11px] text-center text-slate-600 px-4 leading-relaxed">
@@ -193,7 +197,7 @@ export default function RegisterPage() {
               <p className="text-center text-sm font-medium text-slate-500">
                 Already part of the team?{" "}
                 <a
-                  href="#"
+                  href="/login"
                   className="text-blue-500 font-black hover:text-blue-400 ml-1"
                 >
                   Log In
