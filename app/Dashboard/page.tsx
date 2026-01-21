@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Sparkles, Star, ChevronRight, Verified, Info, ShieldCheck, Zap } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Dashboard() {
   return (
@@ -22,7 +23,7 @@ export default function Dashboard() {
           {/* Hero Image / Dynamic Visual */}
           <div className="absolute inset-0 group">
             <img 
-              src="https://images.unsplash.com/photo-1635332392051-873531b40283?q=80&w=2072&auto=format&fit=crop" 
+              src="https://www.shutterstock.com/shutterstock/photos/2473384115/display_1500/stock-photo-programmer-people-working-laptops-or-smartphones-with-ai-artificial-intelligence-software-engineer-2473384115.jpg" 
               alt="Interview Dashboard" 
               className="w-full h-full object-cover opacity-40 mix-blend-luminosity group-hover:scale-105 transition-transform duration-1000"
             />
@@ -101,7 +102,7 @@ export default function Dashboard() {
             {/* Actions */}
             <div className="mt-12 flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-600">
               <button className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 group">
-                <span>Get Started Now</span>
+                <Link href="/register"><span>Get Started Now</span></Link>
                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
               <button className="flex-1 bg-white/5 border border-white/5 text-slate-300 font-black py-4 px-8 rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2">
