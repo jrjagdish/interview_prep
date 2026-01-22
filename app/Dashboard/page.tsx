@@ -3,8 +3,10 @@
 import React from 'react';
 import { Sparkles, Star, ChevronRight, Verified, Info, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
+  const router = useRouter();
   return (
     <div className="min-h-screen w-full bg-[#05080a] text-slate-200 flex items-center justify-center p-0 md:p-8 lg:p-12 overflow-x-hidden relative">
       
@@ -116,7 +118,7 @@ export default function Dashboard() {
           <footer className="mt-12 pt-8 border-t border-white/5 animate-in fade-in duration-1000 delay-800">
             <p className="text-slate-500 text-sm font-medium">
               Already have an account?{" "}
-              <button className="text-blue-500 font-black hover:text-blue-400 ml-1 transition-colors">
+              <button onClick={()=>{router.push("/login")}} className="text-blue-500 font-black hover:text-blue-400 ml-1 transition-colors">
                 Log In
               </button>
             </p>
