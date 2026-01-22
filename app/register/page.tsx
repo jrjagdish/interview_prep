@@ -1,11 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, Eye, EyeOff, Router, ShieldCheck, Sparkles } from "lucide-react";
-import Link from "next/link";
-
+import {
+  ChevronLeft,
+  Eye,
+  EyeOff,
+  Router,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("candidate");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -26,39 +33,46 @@ export default function RegisterPage() {
 
   // 3. Submit function
   const handleRegister = async () => {
-    setLoading(true);
-    setError("");
+    if (!formData.email && !formData.fullName && !formData.password) {
+      setError("fill all fields");
+    } else {
+      setLoading(true);
+      setError("");
 
-    // Determine role: "user" if candidate, "admin" if company
-    // const role = activeTab === "candidate" ? "user" : "admin";
+      // Determine role: "user" if candidate, "admin" if company
+      // const role = activeTab === "candidate" ? "user" : "admin";
 
-    // try {
-    //   const response = await fetch("http://127.0.0.1:8000/auth/register", {
-    //     // Update with your actual API URL
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       email: formData.email,
-    //       password: formData.password,
-    //       full_name: formData.fullName, // Ensure this matches your FastAPI UserCreate schema keys
-    //       role: role, // Role logic injected here
-    //     }),
-    //   });
+      // try {
+      //   const response = await fetch("http://127.0.0.1:8000/auth/register", {
+      //     // Update with your actual API URL
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({
+      //       email: formData.email,
+      //       password: formData.password,
+      //       full_name: formData.fullName, // Ensure this matches your FastAPI UserCreate schema keys
+      //       role: role, // Role logic injected here
+      //     }),
+      //   });
 
-    //   const data = await response.json();
+      //   const data = await response.json();
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
 
-    //   if (!response.ok) {
-    //     throw new Error(data.detail || "Registration failed");
-    //   }
+      //   if (!response.ok) {
+      //     throw new Error(data.detail || "Registration failed");
+      //   }
 
       // alert("Registration successful!");
-      
+
       // Redirect to login or dashboard here
-    // } catch (err: any) {
-    //   setError(err.message);
-    // } finally {
-    //   setLoading(false);
-    // }
+      // } catch (err: any) {
+      //   setError(err.message);
+      // } finally {
+      //   setLoading(false);
+      // }
+    }
   };
   /* --- BACKEND INTEGRATION END --- */
 
@@ -123,6 +137,7 @@ export default function RegisterPage() {
         <div className="flex flex-col gap-5 px-8 pb-8">
           {/* Linked inputs to state using name and onChange */}
           <InputField
+            required
             label="Full Name"
             placeholder="John Doe"
             type="text"
@@ -131,6 +146,7 @@ export default function RegisterPage() {
             onChange={handleInputChange}
           />
           <InputField
+            required
             label="Email Address"
             placeholder="name@company.com"
             type="email"
@@ -145,6 +161,7 @@ export default function RegisterPage() {
             </label>
             <div className="relative group">
               <input
+                required
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
@@ -168,17 +185,14 @@ export default function RegisterPage() {
         </div>
 
         <div className="px-8 pb-10 space-y-6">
-          <Link href="/login">
           <button
-            onClick={() => {
-              handleRegister();
-            }}
+            onClick={handleRegister}
             disabled={loading}
             className={`w-full ${loading ? "opacity-50" : "bg-blue-600 hover:bg-blue-500"} text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group`}
           >
             <span>{loading ? "Processing..." : "Create My Account"}</span>
             <div className="size-1.5 bg-white rounded-full animate-pulse group-hover:scale-125 transition-transform" />
-          </button></Link>
+          </button>
 
           <div className="space-y-4">
             <p className="text-[11px] text-center text-slate-600 px-4 leading-relaxed">
@@ -218,6 +232,7 @@ function InputField({ label, placeholder, type, name, value, onChange }: any) {
         {label}
       </label>
       <input
+        required
         name={name}
         value={value}
         onChange={onChange}

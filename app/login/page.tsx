@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ChevronLeft, Eye, EyeOff, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation"; // --- ADDED: For navigation ---
 import Link from "next/link";
+import { time } from "console";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,34 +21,38 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setLoading(true);
     setError("");
 
-  //   try {
-  //     const response = await fetch("http://127.0.0.1:8000/auth/login", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         email: formData.email,
-  //         password: formData.password,
-  //       }),
-  //     });
+    //   try {
+    //     const response = await fetch("http://127.0.0.1:8000/auth/login", {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({
+    //         email: formData.email,
+    //         password: formData.password,
+    //       }),
+    //     });
 
-  //     const data = await response.json();
+    //     const data = await response.json();
 
-  //     if (!response.ok) {
-  //       throw new Error(data.detail || "Login failed");
-  //     }
+    //     if (!response.ok) {
+    //       throw new Error(data.detail || "Login failed");
+    //     }
 
-  //     // --- SUCCESS: Redirect to home ---
-  //     // Note: The access_token is handled by the browser via HttpOnly cookies
-  //     // set by your FastAPI 'login_user' service.
-      // router.push("/home");
-  //   } catch (err: any) {
-  //     setError(err.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
+    //     // --- SUCCESS: Redirect to home ---
+    //     // Note: The access_token is handled by the browser via HttpOnly cookies
+    //     // set by your FastAPI 'login_user' service.
+
+    setTimeout(() => {
+      router.push("/home");
+    }, 2000);
+    //   } catch (err: any) {
+    //     setError(err.message);
+    //   } finally {
+    //     setLoading(false);
+    //   }
   };
   /* --- BACKEND INTEGRATION END --- */
 
@@ -100,8 +105,8 @@ export default function LoginPage() {
               placeholder="name@example.com"
               className="h-14 w-full rounded-2xl bg-white/[0.03] border border-white/5 px-5 text-sm transition-all focus:border-blue-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-blue-500/10 outline-none placeholder:text-slate-700"
             />
+            {error && <p className="text-xs text-red-400 ml-1">{error}</p>}
           </div>
-
           <div className="space-y-2">
             <div className="flex justify-between items-center ml-1">
               <label className="text-[11px] font-black uppercase tracking-widest text-slate-500">
@@ -133,15 +138,14 @@ export default function LoginPage() {
               </button>
             </div>
             {error && <p className="text-xs text-red-400 ml-1">{error}</p>}
-          </div>
-
-         <Link href="/home"> <button
+          </div>{" "}
+          <button
             type="submit" // --- CHANGED: To submit type ---
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2"
           >
             {loading ? "Verifying..." : "Login to Dashboard"}
-          </button></Link>
+          </button>
         </form>
 
         <div className="flex items-center px-8 py-8">
@@ -153,7 +157,12 @@ export default function LoginPage() {
         </div>
 
         <div className="px-8">
-          <button onClick={()=>{alert("We are working on it")}} className="flex items-center justify-center gap-3 w-full h-14 rounded-2xl bg-white/[0.03] border border-white/5 font-bold text-sm hover:bg-white/[0.06] transition-all group">
+          <button
+            onClick={() => {
+              alert("We are working on it");
+            }}
+            className="flex items-center justify-center gap-3 w-full h-14 rounded-2xl bg-white/[0.03] border border-white/5 font-bold text-sm hover:bg-white/[0.06] transition-all group"
+          >
             <svg
               className="size-5 transition-transform group-hover:scale-110"
               viewBox="0 0 48 48"
@@ -182,12 +191,11 @@ export default function LoginPage() {
         <div className="mt-8 px-8 pb-10 text-center">
           <p className="text-sm font-medium text-slate-500">
             Don&apos;t have an account?
-            <Link href="/register"><button
-              
-              className="text-blue-500 font-black hover:text-blue-400 ml-2 transition-colors"
-            >
-              Sign Up Free
-            </button></Link>
+            <Link href="/register">
+              <button className="text-blue-500 font-black hover:text-blue-400 ml-2 transition-colors">
+                Sign Up Free
+              </button>
+            </Link>
           </p>
         </div>
       </div>

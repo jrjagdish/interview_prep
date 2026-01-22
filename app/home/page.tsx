@@ -15,7 +15,7 @@ import {
   Clock,
   Users
 } from 'lucide-react';
-import router from 'next/router';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 // --- Types ---
@@ -50,6 +50,7 @@ const HomePage = () => {
     { name: 'Problem Solving', level: 65 },
     { name: 'Confidence', level: 55 },
   ];
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 pb-20 selection:bg-indigo-500/30">

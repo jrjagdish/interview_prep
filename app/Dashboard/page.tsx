@@ -3,9 +3,10 @@
 import React from 'react';
 import { Sparkles, Star, ChevronRight, Verified, Info, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
-import router from 'next/router';
+import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
+  const router = useRouter();
   return (
     <div className="min-h-screen w-full bg-[#05080a] text-slate-200 flex items-center justify-center p-0 md:p-8 lg:p-12 overflow-x-hidden relative">
       
