@@ -14,6 +14,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import BottomNav from '../components/NavBar';// Adjust path based on your file structure
+import Link from 'next/link';
 
 export default function ProfilePage() {
   return (
@@ -22,9 +23,9 @@ export default function ProfilePage() {
         
         {/* 1. ELEGANT HEADER */}
         <header className="sticky top-0 z-30 bg-[#0F1113]/80 backdrop-blur-xl px-6 h-20 flex items-center justify-between">
-          <button className="p-2 -ml-2 rounded-full active:bg-white/10 transition-all text-[#C2C6CF]">
+          <Link href="/home"><button className="p-2 -ml-2 rounded-full active:bg-white/10 transition-all text-[#C2C6CF]">
             <ArrowLeft size={22} strokeWidth={1.5} />
-          </button>
+          </button></Link>
           <span className="text-sm font-bold tracking-[0.3em] uppercase opacity-60">Profile</span>
           <button className="p-2 -mr-2 rounded-full active:bg-white/10 transition-all text-[#C2C6CF]">
             <Settings size={22} strokeWidth={1.5} />
