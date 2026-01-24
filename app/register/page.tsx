@@ -5,9 +5,9 @@ import {
   ChevronLeft,
   Eye,
   EyeOff,
-  Router,
   ShieldCheck,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -15,77 +15,78 @@ export default function RegisterPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("candidate");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  /* --- BACKEND INTEGRATION START --- */
-  // 1. Define states to capture input data
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  // 2. Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. Submit function
   const handleRegister = async () => {
-    if (!formData.email && !formData.fullName && !formData.password) {
-      setError("fill all fields");
-    } else {
-      setLoading(true);
-      setError("");
+    // Basic Validation
+    if (!formData.email || !formData.fullName || !formData.password) {
+      setError("Please fill all fields");
+      return;
+    }
 
-      // Determine role: "user" if candidate, "admin" if company
-      // const role = activeTab === "candidate" ? "user" : "admin";
+    setLoading(true);
+    setError("");
 
-      // try {
-      //   const response = await fetch("http://127.0.0.1:8000/auth/register", {
-      //     // Update with your actual API URL
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({
-      //       email: formData.email,
-      //       password: formData.password,
-      //       full_name: formData.fullName, // Ensure this matches your FastAPI UserCreate schema keys
-      //       role: role, // Role logic injected here
-      //     }),
-      //   });
+    try {
+      const role = activeTab === "candidate" ? "user" : "admin";
 
-      //   const data = await response.json();
-      setTimeout(() => {
+      const response = await fetch("http://127.0.0.1:8000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.fullName,
+          role: role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Registration failed");
+      }
+
+      // Success! Browser automatically handles the HTTP-Only cookie.
+      // Redirect based on role
+      if (role === "admin") {
+        router.push("/InterviewerDashboard");
+      } else {
         router.push("/login");
-      }, 2000);
-
-      //   if (!response.ok) {
-      //     throw new Error(data.detail || "Registration failed");
-      //   }
-
-      // alert("Registration successful!");
-
-      // Redirect to login or dashboard here
-      // } catch (err: any) {
-      //   setError(err.message);
-      // } finally {
-      //   setLoading(false);
-      // }
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
-  /* --- BACKEND INTEGRATION END --- */
 
   return (
     <div className="min-h-screen w-full bg-[#05080a] text-slate-200 flex items-center justify-center p-0 sm:p-4 overflow-x-hidden relative">
+      {/* Background Glows */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] size-[400px] bg-blue-600/10 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute top-[60%] -right-[5%] size-[300px] bg-indigo-600/10 blur-[100px] rounded-full" />
       </div>
 
       <div className="w-full max-w-[480px] bg-[#0a1016]/80 sm:border sm:border-white/5 backdrop-blur-2xl sm:rounded-[2.5rem] shadow-2xl flex flex-col relative z-10 animate-in fade-in zoom-in duration-700">
+        {/* Header Section */}
         <div className="flex items-center p-6 justify-between">
-          <button className="group flex size-10 items-center justify-center rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all active:scale-90">
+          <button
+            onClick={() => router.back()}
+            className="group flex size-10 items-center justify-center rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all active:scale-90"
+          >
             <ChevronLeft
               size={20}
               className="group-hover:-translate-x-0.5 transition-transform"
@@ -105,39 +106,38 @@ export default function RegisterPage() {
             <Sparkles size={14} />
             <span>Get Started</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">
             Create Account
           </h1>
-          <p className="text-slate-500 text-sm leading-relaxed">
-            Join 10k+ professionals practicing with AI-driven interview tools.
+          <p className="text-slate-500 text-sm">
+            Join professionals practicing with AI-driven tools.
           </p>
         </div>
 
+        {/* Tab Switcher */}
         <div className="px-8 pb-8">
           <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5 relative">
             <div
-              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-blue-600 rounded-xl transition-all duration-300 ease-out shadow-lg shadow-blue-600/20 ${activeTab === "company" ? "translate-x-[calc(100%+0px)]" : "translate-x-0"}`}
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-blue-600 rounded-xl transition-all duration-300 ease-out shadow-lg ${activeTab === "company" ? "translate-x-[calc(100%+0px)]" : "translate-x-0"}`}
             />
-
             <button
               onClick={() => setActiveTab("candidate")}
-              className={`flex-1 relative z-10 py-3 text-xs font-black uppercase tracking-widest transition-colors duration-300 ${activeTab === "candidate" ? "text-white" : "text-slate-500 hover:text-slate-300"}`}
+              className={`flex-1 relative z-10 py-3 text-xs font-black uppercase tracking-widest transition-colors ${activeTab === "candidate" ? "text-white" : "text-slate-500 hover:text-slate-300"}`}
             >
               Candidate
             </button>
             <button
               onClick={() => setActiveTab("company")}
-              className={`flex-1 relative z-10 py-3 text-xs font-black uppercase tracking-widest transition-colors duration-300 ${activeTab === "company" ? "text-white" : "text-slate-500 hover:text-slate-300"}`}
+              className={`flex-1 relative z-10 py-3 text-xs font-black uppercase tracking-widest transition-colors ${activeTab === "company" ? "text-white" : "text-slate-500 hover:text-slate-300"}`}
             >
               Company
             </button>
           </div>
         </div>
 
+        {/* Inputs */}
         <div className="flex flex-col gap-5 px-8 pb-8">
-          {/* Linked inputs to state using name and onChange */}
           <InputField
-            required
             label="Full Name"
             placeholder="John Doe"
             type="text"
@@ -146,7 +146,6 @@ export default function RegisterPage() {
             onChange={handleInputChange}
           />
           <InputField
-            required
             label="Email Address"
             placeholder="name@company.com"
             type="email"
@@ -161,13 +160,12 @@ export default function RegisterPage() {
             </label>
             <div className="relative group">
               <input
-                required
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="h-14 w-full rounded-2xl bg-white/[0.03] border border-white/5 px-5 text-sm transition-all focus:border-blue-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-blue-500/10 outline-none placeholder:text-slate-700"
+                className="h-14 w-full rounded-2xl bg-white/[0.03] border border-white/5 px-5 text-sm transition-all focus:border-blue-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-blue-500/10 outline-none"
               />
               <button
                 onClick={() => setShowPassword(!showPassword)}
@@ -184,40 +182,33 @@ export default function RegisterPage() {
           </div>
         </div>
 
+        {/* Action Button */}
         <div className="px-8 pb-10 space-y-6">
           <button
             onClick={handleRegister}
             disabled={loading}
-            className={`w-full ${loading ? "opacity-50" : "bg-blue-600 hover:bg-blue-500"} text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group`}
+            className={`w-full h-14 ${loading ? "opacity-70 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500"} text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-2 group`}
           >
-            <span>{loading ? "Processing..." : "Create My Account"}</span>
-            <div className="size-1.5 bg-white rounded-full animate-pulse group-hover:scale-125 transition-transform" />
+            {loading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : (
+              "Create My Account"
+            )}
+            {!loading && (
+              <div className="size-1.5 bg-white rounded-full animate-pulse group-hover:scale-125" />
+            )}
           </button>
 
-          <div className="space-y-4">
-            <p className="text-[11px] text-center text-slate-600 px-4 leading-relaxed">
-              By registering, you agree to our{" "}
-              <span className="text-slate-400 hover:text-blue-400 cursor-pointer transition-colors underline decoration-white/10">
-                Terms
-              </span>{" "}
-              and{" "}
-              <span className="text-slate-400 hover:text-blue-400 cursor-pointer transition-colors underline decoration-white/10">
-                Privacy Policy
-              </span>
-              .
+          <div className="pt-4 border-t border-white/5">
+            <p className="text-center text-sm font-medium text-slate-500">
+              Already part of the team?{" "}
+              <a
+                href="/login"
+                className="text-blue-500 font-black hover:text-blue-400 ml-1"
+              >
+                Log In
+              </a>
             </p>
-
-            <div className="pt-4 border-t border-white/5">
-              <p className="text-center text-sm font-medium text-slate-500">
-                Already part of the team?{" "}
-                <a
-                  href="/login"
-                  className="text-blue-500 font-black hover:text-blue-400 ml-1"
-                >
-                  Log In
-                </a>
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -238,7 +229,7 @@ function InputField({ label, placeholder, type, name, value, onChange }: any) {
         onChange={onChange}
         type={type}
         placeholder={placeholder}
-        className="h-14 w-full rounded-2xl bg-white/[0.03] border border-white/5 px-5 text-sm transition-all focus:border-blue-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-blue-500/10 outline-none placeholder:text-slate-700"
+        className="h-14 w-full rounded-2xl bg-white/[0.03] border border-white/5 px-5 text-sm transition-all focus:border-blue-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-blue-500/10 outline-none"
       />
     </div>
   );

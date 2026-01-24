@@ -21,38 +21,33 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
     setError("");
 
-    //   try {
-    //     const response = await fetch("http://127.0.0.1:8000/auth/login", {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" },
-    //       body: JSON.stringify({
-    //         email: formData.email,
-    //         password: formData.password,
-    //       }),
-    //     });
+    try {
+      const response = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+        // CRITICAL: This allows the browser to save the Set-Cookie headers
+        credentials: "include",
+      });
 
-    //     const data = await response.json();
+      const data = await response.json();
 
-    //     if (!response.ok) {
-    //       throw new Error(data.detail || "Login failed");
-    //     }
+      if (!response.ok) {
+        throw new Error(data.detail || "Login failed");
+      }
 
-    //     // --- SUCCESS: Redirect to home ---
-    //     // Note: The access_token is handled by the browser via HttpOnly cookies
-    //     // set by your FastAPI 'login_user' service.
-
-    setTimeout(() => {
       router.push("/home");
-    }, 2000);
-    //   } catch (err: any) {
-    //     setError(err.message);
-    //   } finally {
-    //     setLoading(false);
-    //   }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
   /* --- BACKEND INTEGRATION END --- */
 
