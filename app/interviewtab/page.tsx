@@ -9,7 +9,6 @@ import {
   Sparkles,
   Plus,
   RotateCcw,
-  AlertCircle, // Added for error icons
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -38,7 +37,7 @@ export default function AIInterviewChat() {
   useEffect(() => {
     const startSession = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/interview/start", {
+        const response = await fetch("http://localhost:8000/interview/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ role: "Software Engineer", level: "Mid" }),
@@ -49,13 +48,14 @@ export default function AIInterviewChat() {
 
         const data = await response.json();
         setSessionId(data.session_id);
+        
+        // Use data.question from the start endpoint
         setChatHistory([{ role: "ai", content: data.question }]);
       } catch (error) {
         setChatHistory([
           {
             role: "ai",
-            content:
-              "System: Unable to connect to the interview server. Please check your connection.",
+            content: "System: Unable to connect to the interview server. Please check your connection.",
           },
         ]);
       }
@@ -74,11 +74,12 @@ export default function AIInterviewChat() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/interview/${sessionId}/answer`,
+        `http://localhost:8000/interview/${sessionId}/answer`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ answer: userMessage }),
+          credentials: "include"
         },
       );
 
@@ -87,12 +88,18 @@ export default function AIInterviewChat() {
       const data = await response.json();
 
       if (data.completed) {
-        // SECURE REDIRECT: Send user to the review folder with the ID
+        // Redirect to review page with final session ID
         router.push(`/review/${sessionId}`);
       } else {
+        // Format the AI response to show Feedback, Score, and the Next Question
+        const aiResponseContent = `📝 **Feedback:** ${data.ai_feedback}\n\n⭐ **Score:** ${data.score}/10\n\n❓ **Next Question:**\n${data.next_question}`;
+        
         setChatHistory((prev) => [
           ...prev,
-          { role: "ai", content: data.question || "Next question..." },
+          { 
+            role: "ai", 
+            content: aiResponseContent 
+          },
         ]);
       }
     } catch (error) {
@@ -100,33 +107,11 @@ export default function AIInterviewChat() {
         ...prev,
         {
           role: "ai",
-          content:
-            "I'm having trouble processing that. Could you try sending your answer again?",
+          content: "I'm having trouble processing that. Could you try sending your answer again?",
         },
       ]);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleEvaluation = async () => {
-    try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/interview/${sessionId}/evaluate`,
-        {
-          method: "POST",
-        },
-      );
-      const data = await response.json();
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          content: `Interview Complete! Score: ${data.score}. Feedback: ${data.feedback}`,
-        },
-      ]);
-    } catch (err) {
-      console.error("Evaluation failed");
     }
   };
 
@@ -190,7 +175,7 @@ export default function AIInterviewChat() {
                 )}
               </div>
               <div
-                className={`relative px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
+                className={`relative px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap ${
                   msg.role === "user"
                     ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-none"
                     : "bg-slate-800/50 border border-white/5 text-slate-200 rounded-tl-none"

@@ -27,7 +27,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/auth/me", {
+        const response = await fetch("http://localhost:8000/auth/me", {
           method: "GET",
           credentials: "include",
         });
@@ -47,7 +47,7 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://127.0.0.1:8000/auth/logout", {
+      await fetch("http://localhost:8000/auth/logout", {
         method: "POST",
         credentials: "include",
       });
