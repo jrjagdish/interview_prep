@@ -1,26 +1,41 @@
-import { Route, Routes } from "react-router-dom";
-import Home from "./pages/Home";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import LenisScroll from "./components/Lenis";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Pricing from "./pages/Pricing";
+import PricingPage from "./pages/PricingPage";
+import Dashboard from "./pages/Dashboard";
+import InterviewPage from "./pages/InterviewPrep";
 
 export default function App() {
+  const location = useLocation();
+
+ 
+  const hideLayout = ["/login", "/register","/profile","/dashboard","/interview-prep"].includes(location.pathname);
+
   return (
     <>
-      <Navbar />
+      
       <LenisScroll />
+
+   
+      {!hideLayout && <Navbar />}
+
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/interview-prep" element={<InterviewPage />} />
       </Routes>
-      <Footer />
+
+     
+      {!hideLayout && <Footer />}
     </>
   );
 }

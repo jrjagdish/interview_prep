@@ -127,10 +127,10 @@ export default function Page() {
           proven confidence.
         </p>
         <div className="flex items-center gap-4 mt-10">
-          <button className="bg-purple-600 hover:bg-purple-700 transition text-white rounded-md px-10 h-12 font-semibold shadow-xl shadow-purple-500/25 active:scale-95">
+          <button className="bg-purple-600 hover:bg-purple-700 transition text-white rounded-md px-4 md:px-10 h-12 font-semibold shadow-xl shadow-purple-500/25 active:scale-95">
             Start Your First Session
           </button>
-          <button className="border border-slate-300 dark:border-slate-700 transition text-slate-700 dark:text-white rounded-md px-10 h-12 hover:bg-white dark:hover:bg-slate-800 active:scale-95">
+          <button className="border border-slate-300 dark:border-slate-700 transition text-slate-700 dark:text-white rounded-md px-4 md:px-10 h-12 hover:bg-white dark:hover:bg-slate-800 active:scale-95">
             Explore Curriculum
           </button>
         </div>
