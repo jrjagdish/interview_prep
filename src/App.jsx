@@ -9,12 +9,13 @@ import Profile from "./pages/Profile";
 import PricingPage from "./pages/PricingPage";
 import Dashboard from "./pages/Dashboard";
 import InterviewPage from "./pages/InterviewPrep";
+import AdminPanel from "./pages/AdminPanel";
 
 export default function App() {
   const location = useLocation();
 
  
-  const hideLayout = ["/login", "/register","/profile","/dashboard","/interview-prep"].includes(location.pathname);
+  const hideLayout = ["/login", "/register","/profile","/dashboard","/interview-prep","/admin"].includes(location.pathname);
 
   return (
     <>
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/interview-prep" element={<InterviewPage />} />
+        <Route path="/admin" element={<AdminPanel />}/>
       </Routes>
 
      
