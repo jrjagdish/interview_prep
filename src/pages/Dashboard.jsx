@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState,useEffect } from 'react';
 import { 
   Sparkles, 
   ChevronRight, 
@@ -24,6 +24,13 @@ import { useThemeContext } from "../context/ThemeContext";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { theme } = useThemeContext();
+  const [name,setName] = useState('');
+  useEffect(() => {
+    const savedName = localStorage.getItem("userName");
+    if (savedName) {
+      setName(savedName);
+    }
+  }, []);
 
   // Mock data for recommendation cards with icons
   const recommendations = [
@@ -62,7 +69,7 @@ export default function Dashboard() {
             </Link>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Welcome back, <span className="text-purple-600">Alex</span> 👋
+                Welcome back, <span className="text-purple-600">{name}</span> 👋
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
                 Pro Member
