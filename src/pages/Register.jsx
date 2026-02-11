@@ -60,7 +60,7 @@ export default function RegisterPage() {
 
       // Success Redirects
       if (role === "admin") {
-        navigate("/InterviewerDashboard");
+        navigate("/admin");
       } else {
         navigate("/login");
       }

@@ -34,8 +34,9 @@ export default function LoginPage() {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Login failed");
+      localStorage.setItem("userName", data.name);
 
-      navigate("/home");
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
