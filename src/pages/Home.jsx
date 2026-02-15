@@ -54,7 +54,7 @@ export default function Page() {
         </p>
 
         <div className="flex items-center gap-4 mt-8">
-          <Link to="/register">
+          <Link to="/login">
             <button className="bg-purple-600 hover:bg-purple-700 transition text-white rounded-md px-8 h-12 font-medium shadow-lg shadow-purple-500/20 active:scale-95">
               Get started free
             </button>

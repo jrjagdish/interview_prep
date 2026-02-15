@@ -4,18 +4,19 @@ import Footer from "./components/Footer";
 import LenisScroll from "./components/Lenis";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
+// import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import PricingPage from "./pages/PricingPage";
 import Dashboard from "./pages/Dashboard";
 import InterviewPage from "./pages/InterviewPrep";
 import AdminPanel from "./pages/AdminPanel";
+import AuthCallback from "./pages/Callback";
 
 export default function App() {
   const location = useLocation();
 
  
-  const hideLayout = ["/login", "/register","/profile","/dashboard","/interview-prep","/admin"].includes(location.pathname);
+  const hideLayout = ["/login", "/register","/profile","/dashboard","/interview-prep","/admin","auth/callback"].includes(location.pathname);
 
   return (
     <>
@@ -29,11 +30,12 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* <Route path="/register" element={<Register />} /> */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/interview-prep" element={<InterviewPage />} />
         <Route path="/admin" element={<AdminPanel />}/>
+        <Route path="/auth/callback" element={<AuthCallback />}/>
       </Routes>
 
      

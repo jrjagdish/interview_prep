@@ -18,6 +18,7 @@ export default function LoginPage() {
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -34,13 +35,30 @@ export default function LoginPage() {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Login failed");
+
+      // --- PERSISTENCE: Store user data ---
       localStorage.setItem("userName", data.name);
+      localStorage.setItem("userEmail", data.email || formData.email);
+      if (data.imgurl) localStorage.setItem("userImg", data.imgurl);
 
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- GOOGLE AUTH: Trigger redirect ---
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/auth/google/login");
+      const data = await response.json();
+      if (data.auth_url) {
+        window.location.href = data.auth_url; // Redirect to Google
+      }
+    } catch (err) {
+      setError("Failed to initialize Google login");
     }
   };
 
@@ -155,6 +173,7 @@ export default function LoginPage() {
         <div className="px-8">
           <button
             type="button"
+            onClick={handleGoogleLogin} // --- ADDED: Action for Google ---
             className="flex items-center justify-center gap-3 w-full h-13 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all group dark:text-white"
           >
             <svg className="size-5" viewBox="0 0 48 48">
@@ -171,9 +190,9 @@ export default function LoginPage() {
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
             Don't have an account?
             <Link to="/register">
-              <button className="text-purple-600 dark:text-purple-400 font-bold hover:underline ml-2 transition-all">
+              <span className="text-purple-600 dark:text-purple-400 font-bold hover:underline ml-2 transition-all cursor-pointer">
                 Sign Up Free
-              </button>
+              </span>
             </Link>
           </p>
         </div>
