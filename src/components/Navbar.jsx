@@ -58,7 +58,7 @@ export default function Navbar() {
             {link.name}
           </Link>
         ))}
-        <Link to="/register" onClick={() => setOpenMobileMenu(false)}>
+        <Link to="/login" onClick={() => setOpenMobileMenu(false)}>
           <button>Sign in</button>
         </Link>
         <button
@@ -76,7 +76,7 @@ export default function Navbar() {
             Sign in
           </button>
         </Link>
-        <Link to="/register">
+        <Link to="/login">
           <button className="hidden md:block px-4 py-2 bg-purple-600 hover:bg-purple-700 transition text-white rounded-md text-sm font-medium">
             Get started
           </button>
