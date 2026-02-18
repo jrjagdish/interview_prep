@@ -102,65 +102,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="px-8 space-y-5">
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">
-              Email Address
-            </label>
-            <input
-              required
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              type="email"
-              placeholder="name@example.com"
-              className="h-13 w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-5 text-sm transition-all focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 outline-none dark:text-white dark:placeholder:text-slate-600"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between items-center ml-1">
-              <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                Password
-              </label>
-              <button type="button" className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400 hover:opacity-80 transition-opacity">
-                Forgot?
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                required
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                className="h-13 w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-5 text-sm transition-all focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 outline-none dark:text-white dark:placeholder:text-slate-600"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-500 transition-colors"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[12px] py-2 px-3 rounded-lg text-center font-medium">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold py-4 rounded-xl shadow-lg shadow-purple-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2"
-          >
-            {loading ? "Verifying..." : "Sign In to Dashboard"}
-          </button>
-        </form>
+        
 
         <div className="flex items-center px-8 py-8">
           <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
