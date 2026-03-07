@@ -12,12 +12,13 @@ import InterviewPage from "./pages/InterviewPrep";
 import AdminPanel from "./pages/AdminPanel";
 import AuthCallback from "./pages/Callback";
 import CodingPanel from "./pages/codeEditor";
+import InterviewReview from "./pages/Review";
 
 export default function App() {
   const location = useLocation();
 
  
-  const hideLayout = ["/login", "/register","/profile","/dashboard","/interview-prep","/admin","auth/callback","/code-editor"].includes(location.pathname);
+  const hideLayout = ["/login", "/register","/profile","/dashboard","/interview-prep","/admin","auth/callback","/code-editor","/review/:sessionId"].includes(location.pathname);
 
   return (
     <>
@@ -38,6 +39,8 @@ export default function App() {
         <Route path="/admin" element={<AdminPanel />}/>
         <Route path="/auth/callback" element={<AuthCallback />}/>
         <Route path="/code-editor" element={<CodingPanel />}/>
+        <Route path="/review/:sessionId" element={<InterviewReview />}/>
+
       </Routes>
 
      

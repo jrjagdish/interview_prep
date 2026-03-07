@@ -31,7 +31,7 @@ const downsampleBuffer = (buffer, sampleRate, exportSampleRate) => {
       count++;
     }
     // PCM 16-bit conversion
-    result[offsetResult] = Math.max(-1, Math.min(1, accum / count)) * 0x7FFF;
+    result[offsetResult] = Math.max(-1, Math.min(1, accum / count)) * 0x7fff;
     offsetResult++;
     offsetBuffer = nextOffsetBuffer;
   }
@@ -39,7 +39,8 @@ const downsampleBuffer = (buffer, sampleRate, exportSampleRate) => {
 };
 
 // Helper to format logs
-const formatLog = (message) => `[${new Date().toLocaleTimeString()}] ${message}`;
+const formatLog = (message) =>
+  `[${new Date().toLocaleTimeString()}] ${message}`;
 
 export default function InterviewPage() {
   const [sessionData, setSessionData] = useState(null);
@@ -47,7 +48,7 @@ export default function InterviewPage() {
   const [error, setError] = useState(null);
   const [logs, setLogs] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
-  
+
   // Refs for Web Audio API and WebSocket
   const ws = useRef(null);
   const inputAudioContext = useRef(null); // Context for mic input
@@ -102,7 +103,7 @@ export default function InterviewPage() {
 
   const setupWebSocket = (sessionId) => {
     addLog("Connecting to voice server...");
-    
+
     // Connect to your new websocket endpoint
     const wsUrl = `ws://localhost:8000/ws/interview/${sessionId}`;
     ws.current = new WebSocket(wsUrl);
@@ -154,23 +155,27 @@ export default function InterviewPage() {
 
   // --- PLAYBACK QUEUEING LOGIC ---
   const playNextInQueue = () => {
-    if (isPlaying.current || audioQueue.current.length === 0 || !outputAudioContext.current) {
+    if (
+      isPlaying.current ||
+      audioQueue.current.length === 0 ||
+      !outputAudioContext.current
+    ) {
       return;
     }
 
     isPlaying.current = true;
     const buffer = audioQueue.current.shift();
-    
+
     const source = outputAudioContext.current.createBufferSource();
     source.buffer = buffer;
     source.connect(outputAudioContext.current.destination);
-    
+
     // When this chunk ends, play the next one
     source.onended = () => {
       isPlaying.current = false;
       playNextInQueue();
     };
-    
+
     source.start(0);
   };
 
@@ -195,8 +200,12 @@ export default function InterviewPage() {
     if (!outputAudioContext.current) {
       outputAudioContext.current = new AudioContext({ sampleRate: 24000 });
     }
-    
-    const buffer = outputAudioContext.current.createBuffer(1, float32Array.length, 24000);
+
+    const buffer = outputAudioContext.current.createBuffer(
+      1,
+      float32Array.length,
+      24000,
+    );
     buffer.copyToChannel(float32Array, 0);
 
     // 4. --- FIX: Add to Queue to prevent overlapping/chopping ---
@@ -211,10 +220,15 @@ export default function InterviewPage() {
       // Create context for mic input
       inputAudioContext.current = new AudioContext();
       const sourceRate = inputAudioContext.current.sampleRate;
-      inputDevice.current = inputAudioContext.current.createMediaStreamSource(stream);
-      
+      inputDevice.current =
+        inputAudioContext.current.createMediaStreamSource(stream);
+
       // Process audio in 4096 sample chunks
-      processor.current = inputAudioContext.current.createScriptProcessor(4096, 1, 1);
+      processor.current = inputAudioContext.current.createScriptProcessor(
+        4096,
+        1,
+        1,
+      );
 
       inputDevice.current.connect(processor.current);
       processor.current.connect(inputAudioContext.current.destination);
@@ -222,13 +236,13 @@ export default function InterviewPage() {
       processor.current.onaudioprocess = (e) => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
           const inputData = e.inputBuffer.getChannelData(0);
-          
+
           // Downsample to 16kHz for STT
           const pcmData = downsampleBuffer(inputData, sourceRate, 16000);
           ws.current.send(pcmData.buffer);
         }
       };
-      
+
       setIsRecording(true);
       addLog("Microphone active.");
     } catch (err) {
@@ -243,20 +257,25 @@ export default function InterviewPage() {
     if (inputDevice.current) inputDevice.current.disconnect();
     if (inputAudioContext.current) inputAudioContext.current.close();
     inputAudioContext.current = null;
-    
+
     // Stop Output
     if (outputAudioContext.current) outputAudioContext.current.close();
     outputAudioContext.current = null;
     audioQueue.current = [];
     isPlaying.current = false;
-    
+
     // Stop Socket
     if (ws.current) ws.current.close();
-    
+
     setIsRecording(false);
     setSessionData(null);
     addLog("Session ended.");
-  }, []);
+    if (currentSessionId) {
+      setTimeout(() => {
+        navigate(`/review/${currentSessionId}`);
+      }, 800);
+    }
+  }, [sessionData, navigate]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#05080a] text-slate-900 dark:text-slate-100 flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden transition-colors duration-500">
@@ -344,16 +363,25 @@ export default function InterviewPage() {
 
             {/* UX Friendly Logs Panel */}
             <div className="w-full max-w-md bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
-                <div className="flex items-center gap-2 mb-3 text-slate-500 dark:text-slate-400">
-                    <MessageSquareText size={16} />
-                    <h3 className="font-bold text-xs uppercase tracking-wider">Session Log</h3>
-                </div>
-                <div className="space-y-1.5 text-xs font-mono text-slate-700 dark:text-slate-300 h-24 overflow-y-auto">
-                    {logs.length === 0 && <p className="text-slate-400">Waiting for events...</p>}
-                    {logs.map((log, i) => (
-                        <p key={i} className={log.includes("Error") ? "text-red-500" : ""}>{log}</p>
-                    ))}
-                </div>
+              <div className="flex items-center gap-2 mb-3 text-slate-500 dark:text-slate-400">
+                <MessageSquareText size={16} />
+                <h3 className="font-bold text-xs uppercase tracking-wider">
+                  Session Log
+                </h3>
+              </div>
+              <div className="space-y-1.5 text-xs font-mono text-slate-700 dark:text-slate-300 h-24 overflow-y-auto">
+                {logs.length === 0 && (
+                  <p className="text-slate-400">Waiting for events...</p>
+                )}
+                {logs.map((log, i) => (
+                  <p
+                    key={i}
+                    className={log.includes("Error") ? "text-red-500" : ""}
+                  >
+                    {log}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -361,12 +389,14 @@ export default function InterviewPage() {
           <div className="pb-6 md:pb-10 flex justify-center">
             <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-3 md:p-4 rounded-[2rem] shadow-2xl flex items-center gap-4 md:gap-6">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-                <div className={`size-3 rounded-full ${isRecording ? "bg-green-500" : "bg-red-500"}`} />
+                <div
+                  className={`size-3 rounded-full ${isRecording ? "bg-green-500" : "bg-red-500"}`}
+                />
                 {isRecording ? "Live" : "Disconnected"}
               </div>
-              
+
               <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
-              
+
               <button
                 onClick={stopRecording}
                 className="flex items-center gap-2 px-4 md:px-5 py-2.5 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-xl font-bold text-sm hover:bg-red-100 transition-all active:scale-95"
